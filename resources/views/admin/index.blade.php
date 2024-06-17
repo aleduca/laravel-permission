@@ -72,6 +72,58 @@
 <div class="row">
   <div class="col-12">
     <h5>Users</h5>
+    <ul class="list-group">
+      @forelse($users as $user)
+      @if(!$user->hasRole('super-admin'))
+      <b>{{ $user->name }}</b>
+      <li class="list-group-item d-flex justify-content-between mb-3">
+        <div>
+          <ul class="list-group">
+            <h6>
+              Roles
+              <small>
+                <a href="{{ route('model.role.create',$user->id) }}"><i class="bi bi-plus-square" style="color:green"></i> Add Role</a>
+              </small>
+            </h6>
+            @forelse($user->roles as $role)
+            <li class="list-group-item d-flex justify-content-between w-100">
+              <span>{{ $role->name }}</span>
+              <form action="{{route('model.role.delete',[$user->id,$role->id])}}" method="post">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-warning btn-sm">Revoke</button>
+              </form>
+            </li>
+            @empty
+            <li class="list-group-item">No role added to this user, yet.</li>
+            @endforelse
+          </ul>
+        </div>
+        <div>
+          <ul class="list-group">
+            <h6>Permissions <small><a href="{{route('model.permission.create',$user->id)}}"><i class="bi bi-plus-square" style="color:green"></i> Add Permission</a></small></h6>
+            @forelse($user->permissions as $permission)
+            <li class="list-group-item">
+              <span>{{$permission->name}}</span>
+              <form action="{{route('model.permission.delete',[$user->id,$permission->id])}}" method="post">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-warning btn-sm">Revoke</button>
+              </form>
+            </li>
+            @empty
+            <li class="list-group-item">
+              No permission to this user
+            </li>
+            @endforelse
+          </ul>
+        </div>
+      </li>
+      @endif
+      @empty
+      <li class="list-group-item">No users created, yet.</li>
+      @endforelse
+    </ul>
   </div>
 </div>
 @endsection

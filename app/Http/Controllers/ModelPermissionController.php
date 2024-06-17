@@ -5,31 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
-class AdminController extends Controller
+class ModelPermissionController extends Controller
 {
   /**
    * Display a listing of the resource.
    */
   public function index()
   {
-    $roles = Role::with('permissions')->where('name', '!=', 'super-admin')->get();
-    $permissions = Permission::all();
-    $users = User::limit(3)->with(['roles', 'permissions'])->get();
-    return view('admin.index', [
-      'roles' => $roles,
-      'permissions' => $permissions,
-      'users' => $users
-    ]);
+    //
   }
 
   /**
    * Show the form for creating a new resource.
    */
-  public function create()
+  public function create(User $user)
   {
-    //
+    $permissions = Permission::all();
+
+    $permissions = $permissions->filter(function ($permission) use ($user) {
+      return !$user->hasPermissionTo($permission);
+    });
+
+    return view('model.permission.create', [
+      'user' => $user,
+      'permissions' => $permissions
+    ]);
   }
 
   /**
@@ -37,7 +38,12 @@ class AdminController extends Controller
    */
   public function store(Request $request)
   {
-    //
+    $user = User::find($request->user_id);
+    $permission = Permission::findById($request->permission_id);
+
+    $user->givePermissionTo($permission);
+
+    return redirect()->route('admin.index');
   }
 
   /**
@@ -67,8 +73,10 @@ class AdminController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(string $id)
+  public function destroy(User $user, Permission $permission)
   {
-    //
+    $user->revokePermissionTo($permission);
+
+    return redirect()->route('admin.index');
   }
 }

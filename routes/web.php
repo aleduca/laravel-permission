@@ -2,6 +2,8 @@
 
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ModelPermissionController;
+use App\Http\Controllers\ModelRoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
@@ -33,4 +35,13 @@ Route::group(['middleware' => 'role:super-admin'], function () {
 
   // Users
 
+  // Roles
+  Route::get('/model/role/create/{user}', [ModelRoleController::class, 'create'])->name('model.role.create');
+  Route::post('/model/role', [ModelRoleController::class, 'store'])->name('model.role.store');
+  Route::delete('/model/role/delete/{user}/{role}', [ModelRoleController::class, 'destroy'])->name('model.role.delete');
+
+  // Permissions
+  Route::get('/model/permission/create/{user}', [ModelPermissionController::class, 'create'])->name('model.permission.create');
+  Route::post('/model/permission', [ModelPermissionController::class, 'store'])->name('model.permission.store');
+  Route::delete('/model/permission/delete/{user}/{permission}', [ModelPermissionController::class, 'destroy'])->name('model.permission.delete');
 });

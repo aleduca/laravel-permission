@@ -4,32 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class AdminController extends Controller
+class ModelRoleController extends Controller
 {
   /**
    * Display a listing of the resource.
    */
   public function index()
   {
-    $roles = Role::with('permissions')->where('name', '!=', 'super-admin')->get();
-    $permissions = Permission::all();
-    $users = User::limit(3)->with(['roles', 'permissions'])->get();
-    return view('admin.index', [
-      'roles' => $roles,
-      'permissions' => $permissions,
-      'users' => $users
-    ]);
+    //
   }
 
   /**
    * Show the form for creating a new resource.
    */
-  public function create()
+  public function create(User $user)
   {
-    //
+
+    $roles = Role::where('name', '!=', 'super-admin')->get();
+
+    $roles = $roles->filter(function ($role) use ($user) {
+      return !$user->hasRole($role);
+    });
+
+    return view('model.role.create', [
+      'user' => $user,
+      'roles' => $roles
+    ]);
   }
 
   /**
@@ -37,7 +39,12 @@ class AdminController extends Controller
    */
   public function store(Request $request)
   {
-    //
+    $user = User::find($request->user_id);
+    $role = Role::findById($request->role_id);
+
+    $user->assignRole($role);
+
+    return redirect()->route('admin.index');
   }
 
   /**
@@ -67,8 +74,10 @@ class AdminController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(string $id)
+  public function destroy(User $user, Role $role)
   {
-    //
+    $user->removeRole($role);
+
+    return redirect()->route('admin.index');
   }
 }
