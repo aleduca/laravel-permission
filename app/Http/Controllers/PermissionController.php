@@ -4,21 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
-class AdminController extends Controller
+class PermissionController extends Controller
 {
   /**
    * Display a listing of the resource.
    */
   public function index()
   {
-    $roles = Role::with('permissions')->where('name', '!=', 'super-admin')->get();
-    $permissions = Permission::all();
-    return view('admin.index', [
-      'roles' => $roles,
-      'permissions' => $permissions
-    ]);
+    //
   }
 
   /**
@@ -26,7 +20,7 @@ class AdminController extends Controller
    */
   public function create()
   {
-    //
+    return view('permission.create');
   }
 
   /**
@@ -34,7 +28,15 @@ class AdminController extends Controller
    */
   public function store(Request $request)
   {
-    //
+    $request->validate([
+      'name' => 'required||unique:permissions,name'
+    ]);
+
+    Permission::create([
+      'name' => $request->name
+    ]);
+
+    return redirect()->route('admin.index');
   }
 
   /**
@@ -64,8 +66,9 @@ class AdminController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(string $id)
+  public function destroy(Permission $permission)
   {
-    //
+    $permission->delete();
+    return back();
   }
 }

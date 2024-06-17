@@ -48,6 +48,24 @@
   </div>
   <div class="col-3">
     <h5>Permissions</h5>
+    <a href="{{ route('permission.create') }}"><i class="bi bi-plus-square" style="color:green"></i> Create Permission</a>
+    <ul class="list-group">
+      @forelse($permissions as $permission)
+      <li class="list-group-item">
+        {{ $permission->name }}
+        <form action="{{route('permission.delete',$permission->id)}}" method="post">
+          @csrf
+          @method('DELETE')
+          <button type="submit" class="btn btn-danger btn-sm">
+            <i class="bi bi-dash-square" style="color:white;"></i>
+            Remove
+          </button>
+        </form>
+      </li>
+      @empty
+      <li class="list-group-item">No permissions created, yet.</li>
+      @endforelse
+    </ul>
   </div>
 </div>
 <hr>
